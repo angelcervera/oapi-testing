@@ -1,0 +1,684 @@
+openapi: 3.0.4
+
+info:
+  title: Palmyra Pro API
+  description: Alpha version of the Palmyra Pro API
+  version: 0.0.1
+
+servers:
+  - url: /
+  - url: https://api.example.com
+    description: Production server
+  - url: https://staging-api.example.com
+    description: Staging server
+  - url: http://localhost:3000
+    description: Local environment
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # FIXME: We should split the definition in multiple files, but looks like swagger-ui-express does not like that.
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code identifier
+        message:
+          type: string
+          description: Human-readable error message
+      required:
+        - code
+        - message
+      example:
+        code: "INVALID_REQUEST"
+        message: "The request contains invalid parameters"
+
+    DashboardLink:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the generated link
+        url:
+          type: string
+          format: uri
+          description: The URL to access the Metabase dashboard
+        dashboardId:
+          type: integer
+          description: The ID of the Metabase dashboard
+        createdAt:
+          type: string
+          format: date-time
+          description: When the link was created
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the link will expire (if applicable)
+      required:
+        - id
+        - url
+        - dashboardId
+        - createdAt
+
+    Form:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the form
+        name:
+          type: string
+          description: Name of the form
+        description:
+          type: string
+          description: Description of the form
+        metadata:
+          type: object
+          description: Additional metadata for the form
+        businessId:
+          type: string
+          description: ID of the business associated with the form
+        createdBy:
+          type: string
+          description: ID of the user who created the form
+        createdAt:
+          type: string
+          format: date-time
+          description: When the form was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the form was last updated
+      required:
+        - id
+        - name
+        - description
+        - metadata
+        - businessId
+        - createdBy
+        - createdAt
+        - updatedAt
+
+    FormCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the form
+        description:
+          type: string
+          description: Description of the form
+          nullable: true
+        metadata:
+          type: object
+          description: Additional metadata for the form
+        businessId:
+          type: string
+          description: ID of the business associated with the form
+      required:
+        - name
+        - metadata
+        - businessId
+
+    FormUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the form
+        description:
+          type: string
+          description: Description of the form
+          nullable: true
+        metadata:
+          type: object
+          description: Additional metadata for the form
+        businessId:
+          type: string
+          description: ID of the business associated with the form
+      required:
+        - name
+        - metadata
+        - businessId
+
+    FormList:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Form'
+        total:
+          type: integer
+          description: Total number of forms
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Number of forms per page
+        totalPages:
+          type: integer
+          description: Total forms of pages
+
+    Farmer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the farmer
+        firstName:
+          type: string
+          description: First name of the farmer
+        lastName:
+          type: string
+          description: Last name of the farmer
+        gender:
+          type: string
+          description: Gender of the farmer
+        phone:
+          type: string
+          description: Phone number of the farmer
+          nullable: true
+        #        maritalStatus:
+        #          type: string
+        #          description: Marital status of the farmer
+        #          nullable: true
+        dob:
+          type: string
+          description: Date of birth of the farmer
+          format: date
+        #        householdSize:
+        #          type: string
+        #          description: Size of the farmer's household
+        #          nullable: true
+        #        estimatedAnnualIncome:
+        #          type: number
+        #          format: float
+        #          description: Estimated annual income of the farmer
+        #          nullable: true
+        #        sourceOfIncome:
+        #          type: string
+        #          description: Source of income for the farmer
+        #          nullable: true
+        countryId:
+          type: string
+          description: ID of the country associated with the farmer
+          nullable: true
+        roleId:
+          type: string
+          description: ID of the role associated with the farmer
+          nullable: true
+        roleDisplayName:
+          type: string
+          description: Display name of the role associated with the farmer
+          nullable: true
+
+        #        userId:
+        #          type: string
+        #          description: ID of the user associated with the farmer
+        #          nullable: true
+        #        farmId:
+        #          type: string
+        #          description: ID of the farm associated with the farmer
+        #          nullable: true
+        regionId:
+          type: string
+          description: ID of the region associated with the farmer
+          nullable: true
+        #        metadata:
+        #          type: object
+        #          description: Additional metadata for the farmer
+        #          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          description: When the farmer was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the farmer was last updated
+      required:
+        - id
+        - firstName
+        - phone
+        - dob
+        - createdAt
+        - updatedAt
+
+    FarmerList:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Farmer'
+        total:
+          type: integer
+          description: Total number of farmers
+        page:
+          type: integer
+          description: Current page number
+        pageSize:
+          type: integer
+          description: Number of items per page
+        totalPages:
+          type: integer
+          description: Total number of pages
+
+    Beehive:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+security:
+  - BearerAuth: []
+
+paths:
+  /dashboard-links:
+    get:
+      summary: Generate a new dashboard link
+      description: Creates a new link to access a published Metabase dashboard
+      operationId: createDashboardLink
+      responses:
+        '201':
+          description: Dashboard link created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardLink'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Dashboard not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+
+#  /forms:
+#    post:
+#      summary: Create a new form
+#      description: Creates a new form
+#      operationId: createForm
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/FormCreateRequest'
+#      responses:
+#        '201':
+#          description: Form created successfully
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Form'
+#        '400':
+#          description: Invalid request
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '401':
+#          description: Unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#
+#  /forms/{id}:
+#    get:
+#      summary: Get a form by ID
+#      description: Returns a form by ID
+#      operationId: getFormById
+#      parameters:
+#        - name: id
+#          in: path
+#          description: Form ID
+#          required: true
+#          schema:
+#            type: string
+#      responses:
+#        '200':
+#          description: Form found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Form'
+#        '401':
+#          description: Unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '404':
+#          description: Form not found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#    put:
+#      summary: Update a form
+#      description: Updates an existing form
+#      operationId: updateForm
+#      parameters:
+#        - name: id
+#          in: path
+#          description: Form ID
+#          required: true
+#          schema:
+#            type: string
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/FormUpdateRequest'
+#      responses:
+#        '200':
+#          description: Form updated successfully
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Form'
+#        '400':
+#          description: Invalid request
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '401':
+#          description: Unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '404':
+#          description: Form not found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#    delete:
+#      summary: Delete a form
+#      description: Deletes an existing form
+#      operationId: deleteForm
+#      parameters:
+#        - name: id
+#          in: path
+#          description: Form ID
+#          required: true
+#          schema:
+#            type: string
+#      responses:
+#        '204':
+#          description: Form deleted successfully
+#        '401':
+#          description: Unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '404':
+#          description: Form not found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#
+#  /forms/search:
+#    get:
+#      summary: Search forms
+#      description: Search forms with filters
+#      operationId: searchForms
+#      parameters:
+#        - name: query
+#          in: query
+#          description: Fuzzy search query text
+#          required: false
+#          schema:
+#            type: string
+#        - name: businessId
+#          in: query
+#          description: Filter by business ID
+#          required: false
+#          schema:
+#            type: string
+#        - name: createdBy
+#          in: query
+#          description: Filter by creator ID
+#          required: false
+#          schema:
+#            type: string
+#        - name: createdAtFrom
+#          in: query
+#          description: Filter created after this date, inclusive
+#          required: false
+#          schema:
+#            type: string
+#            format: date-time
+#        - name: createdAtTo
+#          in: query
+#          description: Filter created before this date, exclusive
+#          required: false
+#          schema:
+#            type: string
+#            format: date-time
+#        - name: page
+#          in: query
+#          description: Page number
+#          required: false
+#          schema:
+#            type: integer
+#            default: 1
+#        - name: pageSize
+#          in: query
+#          description: Number of items per page
+#          required: false
+#          schema:
+#            type: integer
+#            default: 10
+#      responses:
+#        '200':
+#          description: Search results
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/FormList'
+#        '400':
+#          description: Invalid request
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '401':
+#          description: Unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+
+#  /farmers/{id}:
+#    get:
+#      summary: Get a farmer by ID
+#      description: Returns a farmer by ID
+#      operationId: getFarmerById
+#      parameters:
+#        - name: id
+#          in: path
+#          description: Farmer ID
+#          required: true
+#          schema:
+#            type: string
+#      responses:
+#        '200':
+#          description: Farmer found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Farmer'
+#        '401':
+#          description: Unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+#        '404':
+#          description: Farmer not found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/Error'
+
+  /farmers/search:
+    get:
+      summary: Search farmers
+      description: Search farmers with filters
+      operationId: searchFarmers
+      parameters:
+        - name: query
+          in: query
+          description: Fuzzy search query text
+          required: false
+          schema:
+            type: string
+        - name: businessId
+          in: query
+          description: Filter by business ID
+          required: false
+          schema:
+            type: string
+        - name: createdBy
+          in: query
+          description: Filter by creator ID
+          required: false
+          schema:
+            type: string
+        - name: createdAtFrom
+          in: query
+          description: Filter created after this date, inclusive
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdAtTo
+          in: query
+          description: Filter created before this date, exclusive
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          description: Page number
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            default: 10
+
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmerList'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+#  /beehives:
+#    get:
+#      summary: Get all beehives
+#      description: Retrieves a list of all beehives.
+#      operationId: getAllBeehives
+#      responses:
+#        "200":
+#          description: A list of beehives.
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: "#/components/schemas/Beehive"
+#
+#  /beehives/byFarmerId:
+#    get:
+#      summary: Get beehives by farmer ID
+#      description: Retrieves a list of beehives that belong to a specific farmer.
+#      operationId: getBeehivesByFarmerId
+#      parameters:
+#        - name: farmerId
+#          in: query
+#          required: true
+#          description: The ID of the farmer to filter beehives by.
+#          schema:
+#            type: string
+#      responses:
+#        "200":
+#          description: A list of beehives belonging to the specified farmer.
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: "#/components/schemas/Beehive"
+#        "400":
+#          description: Invalid request, missing farmerId query parameter.
+#        "404":
+#          description: No beehives found for the given farmer ID.
+
+
+
+
