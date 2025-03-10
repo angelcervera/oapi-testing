@@ -12,7 +12,7 @@ func main() {
 
 	// Create Repository connections.
 	connection, err := db.NewDB(&db.Config{
-		DBConnection: "",
+		DBConnection: "user=postgres password=mysecretpassword host=localhost port=5432 dbname=palmira_pro_db sslmode=disable",
 		Debug:        false,
 		MaxOpenConn:  0,
 		MaxIdleConns: 0,

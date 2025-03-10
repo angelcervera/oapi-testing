@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"github.com/uptrace/bun"
 	"palmyra-pro-api/pkg/db/models"
 )
@@ -38,7 +37,7 @@ func (r *farmerRepo) DeleteFarmer(ctx context.Context, id string) error {
 	return err
 }
 
-func (r *farmerRepo) QuickSearchFarmers(ctx context.Context, fuzzyFilter, id, nrc string, limit, offset int) ([]*models.FarmerQuickSearch, error) {
+func (r *farmerRepo) QuickSearchFarmers(ctx context.Context, fuzzyFilter string, limit, offset int) ([]*models.FarmerQuickSearch, error) {
 	var err error
 	var farmers []*models.FarmerQuickSearch
 
@@ -64,11 +63,9 @@ func (r *farmerRepo) QuickSearchFarmers(ctx context.Context, fuzzyFilter, id, nr
 
 	// FIXME: Use a real fuzzy search solution.
 	if len(fuzzyFilter) > 4 {
-		query = query.WhereOr(`"firstName" || ' ' || "lastName" ILIKE ?`, "%"+fuzzyFilter+"%")
-	}
-
-	if len(id) > 0 {
-		query = query.WhereOr("id = ?", id)
+		query = query.WhereOr(`"firstName" || ' ' || "lastName" ILIKE ? OR farmer_quick_search.id = ?`, "%"+fuzzyFilter+"%", fuzzyFilter)
+	} else if len(fuzzyFilter) <= 4 {
+		query = query.WhereOr("farmer_quick_search.id = ?", fuzzyFilter)
 	}
 
 	if limit > 0 {
@@ -77,10 +74,6 @@ func (r *farmerRepo) QuickSearchFarmers(ctx context.Context, fuzzyFilter, id, nr
 
 	if offset > 0 {
 		query = query.Offset(offset)
-	}
-
-	if len(nrc) > 0 {
-		return nil, fmt.Errorf("nrc filter still not implemented")
 	}
 
 	err = query.Scan(ctx, &farmers)

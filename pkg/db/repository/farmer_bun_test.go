@@ -84,11 +84,15 @@ func TestQuickSearchFarmersRepo(t *testing.T) {
 	repo := NewFarmerRepo(db)
 	ctx := context.Background()
 
-	farmers, err := repo.QuickSearchFarmers(ctx, "Joe", "", "", 10, 0)
+	farmers, err := repo.QuickSearchFarmers(ctx, "Joe", 0, 0)
 	require.NoError(t, err, "Failed searching farmers using fuzzy search.")
-	assert.Equal(t, 10, len(farmers), "Joe does not apply to the filter because only 3 chars. Expecting to find 10 farmers because the limit")
+	assert.Equal(t, 0, len(farmers), "Joe does not apply to the filter because only 3 chars.")
 
-	farmers, err = repo.QuickSearchFarmers(ctx, "Smith", "", "", 10, 0)
+	farmers, err = repo.QuickSearchFarmers(ctx, "5", 0, 0)
+	require.NoError(t, err, "Failed searching farmers using fuzzy search.")
+	assert.Equal(t, 1, len(farmers), "1 will find one because it's searching by the code")
+
+	farmers, err = repo.QuickSearchFarmers(ctx, "Smith", 10, 0)
 	require.NoError(t, err, "Failed searching farmers using fuzzy search.")
 	assert.Equal(t, 2, len(farmers), "Expecting to find 2 farmers with name Smith")
 }
