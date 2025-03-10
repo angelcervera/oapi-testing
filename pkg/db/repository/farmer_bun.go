@@ -56,7 +56,7 @@ func (r *farmerRepo) QuickSearchFarmers(ctx context.Context, fuzzyFilter string,
 
 	query := r.db.NewSelect().
 		Model(&farmers).
-		// FIXME: Don't use upper case in databases!!!!
+		// FIXME: WTF!!! Don't use upper case in databases!!!! https://wiki.postgresql.org/wiki/Don't_Do_This#Don.27t_use_upper_case_table_or_column_names
 		ColumnExpr(`farmer_quick_search.*, farm.id AS "farmId", farm.name AS "farmName", role.id AS "roleId", role."displayName" AS "roleDisplayName"`).
 		Join(`left join farm on farm.id = farmer_quick_search."farmId"`).
 		Join(`left join role ON farmer_quick_search."roleId" = role.id`)
