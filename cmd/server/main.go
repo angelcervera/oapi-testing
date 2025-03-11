@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"palmyra-pro-api/pkg/api"
 	"palmyra-pro-api/pkg/db"
 	"palmyra-pro-api/pkg/db/repository"
@@ -11,8 +13,11 @@ import (
 func main() {
 
 	// Create Repository connections.
+	dbConnection := os.Getenv("DB_CONNECTION")
+	fmt.Printf("Connecting to database [%s]", dbConnection)
+
 	connection, err := db.NewDB(&db.Config{
-		DBConnection: "user=postgres password=mysecretpassword host=localhost port=5432 dbname=palmira_pro_db sslmode=disable",
+		DBConnection: dbConnection,
 		Debug:        false,
 		MaxOpenConn:  0,
 		MaxIdleConns: 0,

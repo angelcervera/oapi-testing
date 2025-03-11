@@ -1,0 +1,61 @@
+version: "3"
+
+services:
+
+  #  honey-producers:
+  #    container_name: honey-producers
+  #    build:
+  #      context: .
+  #      dockerfile: ./apps/honey-producers/Dockerfile
+  #    restart: on-failure
+  #    ports:
+  #      - "8080:3000"
+  #    networks:
+  #      - app_network
+
+  api:
+    container_name: server-api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+
+    env_file:
+      - ./config/.env.dockercompose
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17.4
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: palmira_pro_db
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "postgres", "-d", "palmira_pro_db" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./config/postgres:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer
+    restart: on-failure
+    ports:
+      - "9090:8080"
+
+# Define a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+#networks:
+#  palmyra_pro:
+#    external: true
+
+volumes:
+  pgdata:
